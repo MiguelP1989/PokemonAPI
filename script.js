@@ -49,8 +49,7 @@ const selectPokemon = async id => {
     console.log("data in pokecache", data);
 
     displayPopup(data);
-  }
-  displayPopup(pokeCache[id]);
+  } else displayPopup(pokeCache[id]);
 };
 
 const displayPopup = data => {
@@ -61,7 +60,7 @@ const displayPopup = data => {
   const htmlString = `
     <div class="popup">
         <button id="closeBtn" onclick="closePopup()">Close</button>
-        <div class="card" >
+        <div >
             <img class="card-image" src="${image}"/>
             <h2 class="card-title">${data.id}. ${data.name}</h2>
             <p>Height: ${data.height} | weight: ${data.weight} | Type: ${pokemontype} </p>
