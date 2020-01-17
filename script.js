@@ -1,44 +1,72 @@
 const pokedex = document.getElementById("pokedex");
 
-console.log(pokedex);
+const fetchPokemon = async () => {
+  const url = `https://pokeapi.co/api/v2/pokemon?limit=150`;
+  const res = await fetch(url);
+  const data = await res.json();
+  console.log(data);
 
-const fetchPokemon = () => {
-  console.log("fetiching pokemon");
+  const pokemon = data.results.map((result, index) => ({
+    // or ...results,
+    name: result.name,
+    apiURL: result.url,
+    id: index + 1,
+    image: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index +
+      1}.png`
+  }));
 
-  const promises = [];
-  for (let i = 1; i <= 150; i++) {
-    const url = `https://pokeapi.co/api/v2/pokemon/${i}`;
-    promises.push(fetch(url).then(res => res.json()));
-  }
-
-  Promise.all(promises).then(results => {
-    const pokemon = results.map(data => ({
-      name: data.name,
-      id: data.id,
-      image: data.sprites["front_default"],
-      type: data.types.map(type => type.type.name).join(", ")
-    }));
-    // console.log(pokemon);
-    displayPokemon(pokemon);
-  });
+  displayPokemon(pokemon);
 };
 
 const displayPokemon = pokemon => {
-  console.log(pokemon);
+  console.log("pokemon", pokemon);
   const pokemonHTMLString = pokemon
     .map(
       pokemon => `
       <div class="container">
-      <li class="card">
+      <li class="card" onClick="selectPokemon(${pokemon.id})">
       <img class="card-image" src="${pokemon.image}"/>
       <h2 class="card-title">${pokemon.id}. ${pokemon.name}</h2>
-      <p class="card-subtitle">Type: ${pokemon.type}</p>
+
       </li>
       </div>`
     )
     .join("");
-  // console.log(pokemonHTMLString);
+
   pokedex.innerHTML = pokemonHTMLString;
+};
+
+const selectPokemon = async id => {
+  const url = `https://pokeapi.co/api/v2/pokemon/${id}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  // console.log(data);
+
+  displayPopup(data);
+};
+
+const displayPopup = data => {
+  const pokemontype = data.types.map(type => type.type.name).join(", ");
+
+  const image = data.sprites["front_default"];
+
+  const htmlString = `
+    <div class="popup">
+        <button id="closeBtn" onclick="closePopup()">Close</button>
+        <div class="card" >
+            <img class="card-image" src="${image}"/>
+            <h2 class="card-title">${data.id}. ${data.name}</h2>
+            <p>Height: ${data.height} | weight: ${data.weight} | Type: ${pokemontype} </p>
+
+        </div>
+    </div>`;
+
+  pokedex.innerHTML = htmlString + pokedex.innerHTML;
+};
+
+const closePopup = () => {
+  const popup = document.querySelector(".popup");
+  popup.parentElement.removeChild(popup);
 };
 
 fetchPokemon();
